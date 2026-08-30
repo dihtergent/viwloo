@@ -32,7 +32,7 @@ tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 SECRET_KEY = 'django-insecure-0%#fnmp+@)73qc0zu*$cb_zw*!uo4t=14jpr((_q4wv_++)bg0'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
 
