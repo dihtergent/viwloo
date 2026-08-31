@@ -4,4 +4,6 @@ dj-database-url
 gunicorn
 python-dotenv
 cloudinary
+whitenoise
+
 
