@@ -27,19 +27,13 @@ import cloudinary.api
 # Load environment variables from .env file
 load_dotenv()
 
-# Parse the database URL
-tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0%#fnmp+@)73qc0zu*$cb_zw*!uo4t=14jpr((_q4wv_++)bg0'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-0%#fnmp+@)73qc0zu*$cb_zw*!uo4t=14jpr((_q4wv_++)bg0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1', 'localhost', '*']
 
 
 # Application definition
@@ -85,20 +79,28 @@ TEMPLATES = [
 WSGI_APPLICATION = 'viewvoo.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.replace('/', ''),
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
-        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+# Parse the database URL safely
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
+    tmpPostgres = urlparse(DATABASE_URL)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': tmpPostgres.path.replace('/', ''),
+            'USER': tmpPostgres.username,
+            'PASSWORD': tmpPostgres.password,
+            'HOST': tmpPostgres.hostname,
+            'PORT': 5432,
+            'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation

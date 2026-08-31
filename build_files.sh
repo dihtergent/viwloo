@@ -1,4 +1,4 @@
-python -m pip install --upgrade pip --break-system-packages
-pip install -r requirements.txt --break-system-packages
-python manage.py collectstatic --noinput
-pip install cloudinary --break-system-packages
+python3 -m pip install -r requirements.txt
+python3 manage.py collectstatic --noinput
+mkdir -p staticfiles_build
+
