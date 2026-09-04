@@ -1,10 +1,8 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib import messages
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import UserProfile, Post
 
@@ -163,4 +161,4 @@ def account_settings(request):
     context = {
         'profile': profile,
     }
-    return render(request, 'accout_setting.html', context)
+    return render(request, 'account_setting.html', context)
