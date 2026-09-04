@@ -149,6 +149,82 @@ def post_detail(request, pk):
     return render(request, 'post_detail.html', context)
 
 
+# ---------- Edit Post ----------
+
+@login_required(login_url='/')
+def edit_post(request, pk):
+    """Edit an existing post (owner only)."""
+    post = get_object_or_404(Post, pk=pk)
+    if post.author != request.user:
+        messages.error(request, 'You are not authorized to edit this post.')
+        return redirect('post_detail', pk=pk)
+
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        body = request.POST.get('body', '').strip()
+        category = request.POST.get('category', 'recommended')
+        image_file = request.FILES.get('image')
+        location_name = request.POST.get('location_name', '').strip()
+        lat = request.POST.get('latitude', '').strip()
+        lng = request.POST.get('longitude', '').strip()
+        clear_loc = request.POST.get('clear_location') == '1'
+
+        if not title:
+            messages.error(request, 'Title is required.')
+            return redirect('edit_post', pk=pk)
+
+        post.title = title
+        post.body = body
+        post.category = category
+        post.location_name = location_name
+
+        if clear_loc:
+            post.latitude = None
+            post.longitude = None
+            post.location_name = ''
+        elif lat and lng:
+            try:
+                post.latitude = float(lat)
+                post.longitude = float(lng)
+            except (ValueError, TypeError):
+                pass
+
+        if image_file:
+            upload_result = cloudinary.uploader.upload(image_file)
+            post.image = upload_result.get('public_id')
+
+        post.save()
+        messages.success(request, 'Post updated successfully!')
+        return redirect('post_detail', pk=pk)
+
+    profile, _ = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'display_name': request.user.username}
+    )
+
+    context = {
+        'post': post,
+        'profile': profile,
+    }
+    return render(request, 'edit_post.html', context)
+
+
+# ---------- Delete Post ----------
+
+@login_required(login_url='/')
+@require_POST
+def delete_post(request, pk):
+    """Delete a post (owner only)."""
+    post = get_object_or_404(Post, pk=pk)
+    if post.author != request.user:
+        messages.error(request, 'You are not authorized to delete this post.')
+        return redirect('post_detail', pk=pk)
+
+    post.delete()
+    messages.success(request, 'Post deleted successfully.')
+    return redirect('page')
+
+
 # ---------- Add Comment ----------
 
 @login_required(login_url='/')
