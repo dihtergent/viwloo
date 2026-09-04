@@ -316,6 +316,20 @@
             font-weight: 500;
         }
 
+        .time-left-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(124, 92, 252, 0.12);
+            color: var(--accent-hover);
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: auto;
+            border: 1px solid rgba(124, 92, 252, 0.2);
+        }
+
         /* Card without image */
         .card.text-only .card-body {
             padding: 20px 16px;
@@ -695,11 +709,8 @@
 
         <div class="tabs-wrapper">
             <nav class="tabs" id="tabs">
-                <a href="{% url 'page' %}" class="tab {% if current_tab == 'all' %}active{% endif %}">All</a>
-                <a href="{% url 'page' %}?tab=recommended" class="tab {% if current_tab == 'recommended' %}active{% endif %}">Recommended</a>
-                <a href="{% url 'page' %}?tab=itinerary" class="tab {% if current_tab == 'itinerary' %}active{% endif %}">Itinerary</a>
-                <a href="{% url 'page' %}?tab=route" class="tab {% if current_tab == 'route' %}active{% endif %}">Route</a>
-                <a href="{% url 'page' %}?tab=proxy" class="tab {% if current_tab == 'proxy' %}active{% endif %}">Proxy Level</a>
+                <a href="{% url 'page' %}?tab=interknot" class="tab {% if current_tab == 'interknot' or current_tab == 'all' %}active{% endif %}">Interknot</a>
+                <a href="{% url 'page' %}?tab=proxy" class="tab {% if current_tab == 'proxy' %}active{% endif %}">Proxy</a>
             </nav>
         </div>
 
@@ -758,6 +769,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
                         {{ post.comments.count }}
                     </div>
+                    <div class="time-left-badge" title="Time left before auto-delete">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {{ post.time_left_display }}
+                    </div>
                 </div>
             </article>
             {% endfor %}
@@ -796,11 +811,9 @@
                     </div>
                     <div class="form-group">
                         <label for="post-category">Category</label>
-                        <select id="post-category" name="category">
-                            <option value="recommended">Recommended</option>
-                            <option value="itinerary">Itinerary</option>
-                            <option value="route">Route</option>
-                            <option value="proxy">Proxy Level</option>
+                        <select class="form-select" name="category" id="post-category">
+                            <option value="interknot">Interknot</option>
+                            <option value="proxy">Proxy</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -832,7 +845,18 @@
         </div>
     </div>
 
-    <script>
+        // Prevent Double Submissions
+        const createForm = document.querySelector('#modal-create form');
+        if (createForm) {
+            createForm.addEventListener('submit', function() {
+                const btn = createForm.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = 'Publishing...';
+                }
+            });
+        }
+
         // FAB → Modal
         const fab = document.getElementById('fab-add');
         const modal = document.getElementById('modal-create');

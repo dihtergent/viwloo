@@ -28,10 +28,8 @@ class UserProfile(models.Model):
 
 
 CATEGORY_CHOICES = [
-    ('recommended', 'Recommended'),
-    ('itinerary', 'Itinerary'),
-    ('route', 'Route'),
-    ('proxy', 'Proxy Level'),
+    ('interknot', 'Interknot'),
+    ('proxy', 'Proxy'),
 ]
 
 
@@ -40,7 +38,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField(blank=True)
     image = CloudinaryField('image', blank=True, null=True)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='recommended')
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='interknot')
     views_count = models.PositiveIntegerField(default=0)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -62,6 +60,37 @@ class Post(models.Model):
         if self.has_location:
             return f'https://www.google.com/maps?q={self.latitude},{self.longitude}'
         return ''
+
+    @property
+    def expires_at(self):
+        from datetime import timedelta
+        return self.created_at + timedelta(days=100)
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return timezone.now() >= self.expires_at
+
+    @property
+    def time_left_display(self):
+        from django.utils import timezone
+        now = timezone.now()
+        if now >= self.expires_at:
+            return "Expired"
+        
+        diff = self.expires_at - now
+        days = diff.days
+        total_seconds = int(diff.total_seconds())
+
+        if days > 2:
+            return f"{days} days left"
+        else:
+            hours = total_seconds // 3600
+            if hours >= 1:
+                return f"{hours} hours left"
+            else:
+                minutes = max(1, total_seconds // 60)
+                return f"{minutes} min left"
 
 
 class Comment(models.Model):

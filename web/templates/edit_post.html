@@ -296,10 +296,8 @@
                 <div class="form-group">
                     <label class="form-label" for="category">Category</label>
                     <select class="form-select" id="category" name="category">
-                        <option value="recommended" {% if post.category == 'recommended' %}selected{% endif %}>Recommended</option>
-                        <option value="itinerary" {% if post.category == 'itinerary' %}selected{% endif %}>Itinerary</option>
-                        <option value="route" {% if post.category == 'route' %}selected{% endif %}>Route</option>
-                        <option value="proxy" {% if post.category == 'proxy' %}selected{% endif %}>Proxy Level</option>
+                        <option value="interknot" {% if post.category == 'interknot' or post.category != 'proxy' %}selected{% endif %}>Interknot</option>
+                        <option value="proxy" {% if post.category == 'proxy' %}selected{% endif %}>Proxy</option>
                     </select>
                 </div>
 

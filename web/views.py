@@ -57,17 +57,32 @@ def logout_view(request):
     return redirect('index')
 
 
+# ---------- Expiration Helper ----------
+
+from datetime import timedelta
+from django.utils import timezone
+
+def purge_expired_posts():
+    """Purge posts older than 100 days."""
+    cutoff = timezone.now() - timedelta(days=100)
+    Post.objects.filter(created_at__lt=cutoff).delete()
+
+
 # ---------- Feed ----------
 
 @login_required(login_url='/')
 def page_view(request):
-    """Main feed — masonry grid of posts with optional tab filtering."""
-    tab = request.GET.get('tab', 'all')
+    """Main feed — masonry grid of posts with Interknot & Proxy tabs."""
+    purge_expired_posts()
+    tab = request.GET.get('tab', 'interknot')
 
-    if tab and tab != 'all':
-        posts = Post.objects.filter(category=tab).select_related('author', 'author__profile')
+    if tab == 'proxy':
+        posts = Post.objects.filter(category='proxy').select_related('author', 'author__profile')
     else:
-        posts = Post.objects.all().select_related('author', 'author__profile')
+        # Default 'interknot' tab includes interknot & legacy categories
+        posts = Post.objects.filter(
+            models.Q(category='interknot') | models.Q(category__in=['recommended', 'itinerary', 'route'])
+        ).select_related('author', 'author__profile')
 
     # Ensure current user has a profile
     profile, _ = UserProfile.objects.get_or_create(
@@ -87,11 +102,14 @@ def page_view(request):
 
 @login_required(login_url='/')
 def create_post(request):
-    """Handle post creation with optional GPS location."""
+    """Handle post creation with optional GPS location and double post protection."""
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         body = request.POST.get('body', '').strip()
-        category = request.POST.get('category', 'recommended')
+        category = request.POST.get('category', 'interknot')
+        if category not in ['interknot', 'proxy']:
+            category = 'interknot'
+
         image_file = request.FILES.get('image')
         location_name = request.POST.get('location_name', '').strip()
         lat = request.POST.get('latitude', '').strip()
@@ -99,6 +117,12 @@ def create_post(request):
 
         if not title:
             messages.error(request, 'Title is required.')
+            return redirect('page')
+
+        # Double post submission guard (5-second debounce)
+        recent_cutoff = timezone.now() - timedelta(seconds=5)
+        if Post.objects.filter(author=request.user, title=title, created_at__gte=recent_cutoff).exists():
+            messages.info(request, 'Post already created!')
             return redirect('page')
 
         post = Post(author=request.user, title=title, body=body, category=category)
