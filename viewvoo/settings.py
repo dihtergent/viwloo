@@ -28,7 +28,7 @@ import cloudinary.api
 load_dotenv()
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-0%#fnmp+@)73qc0zu*$cb_zw*!uo4t=14jpr((_q4wv_++)bg0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'

@@ -23,6 +23,8 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('page/', views.page_view, name='page'),
     path('post/create/', views.create_post, name='create_post'),
+    path('post/<int:pk>/', views.post_detail, name='post_detail'),
+    path('post/<int:pk>/comment/', views.add_comment, name='add_comment'),
     path('settings/', views.account_settings, name='account_settings'),
     path('logout/', views.logout_view, name='logout'),
 ]

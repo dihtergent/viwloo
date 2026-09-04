@@ -548,6 +548,115 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 4px; }
+
+        /* ============================================================
+           LOCATION BADGE ON CARDS
+           ============================================================ */
+        .card-location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 16px 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .card-location svg { width: 14px; height: 14px; flex-shrink: 0; color: var(--pink); }
+        .card-location span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-maps-btn {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(244, 114, 182, 0.12);
+            color: var(--pink);
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .card-maps-btn:hover {
+            background: rgba(244, 114, 182, 0.25);
+            color: #fff;
+        }
+        .card-maps-btn svg { width: 12px; height: 12px; }
+
+        /* ============================================================
+           LOCATION INPUT IN MODAL
+           ============================================================ */
+        .location-group {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface);
+            overflow: hidden;
+        }
+        .location-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .location-header svg { width: 16px; height: 16px; color: var(--pink); }
+        .location-header span { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+        .gps-btn {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .gps-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .gps-btn.active { background: var(--green); color: #0a0a0c; border-color: var(--green); }
+        .gps-btn svg { width: 14px; height: 14px; }
+        .gps-btn.loading { pointer-events: none; opacity: 0.7; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .gps-btn.loading svg { animation: spin 1s linear infinite; }
+        .location-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+        .location-input::placeholder { color: var(--text-muted); }
+        .location-coords {
+            padding: 6px 14px 10px;
+            font-size: 11px;
+            color: var(--text-muted);
+            display: none;
+        }
+        .location-coords.visible { display: block; }
+        .location-coords .coord-value { color: var(--green); font-weight: 600; }
+
+        /* Comment count badge on card */
+        .card-comment-count {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .card-comment-count svg { width: 13px; height: 13px; }
     </style>
 </head>
 <body>
@@ -607,6 +716,7 @@
         <div class="masonry" id="masonry-grid">
             {% for post in posts %}
             <article class="card {% if not post.image %}text-only{% endif %}" id="post-{{ post.id }}">
+                <a href="{% url 'post_detail' post.id %}" style="text-decoration:none;color:inherit;display:block;">
                 {% if post.image %}
                 <div class="card-image-wrap">
                     <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
@@ -626,6 +736,17 @@
                     <p class="card-excerpt">{{ post.body }}</p>
                     {% endif %}
                 </div>
+                </a>
+                {% if post.has_location %}
+                <div class="card-location">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <span>{{ post.location_name|default:"📍 Location" }}</span>
+                    <a href="{{ post.google_maps_url }}" target="_blank" rel="noopener" class="card-maps-btn" onclick="event.stopPropagation();">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 12 12 5 19 12"/><path d="M12 19V5"/></svg>
+                        Maps
+                    </a>
+                </div>
+                {% endif %}
                 <div class="card-footer">
                     {% if post.author.profile.avatar %}
                         <img class="card-author-avatar" src="{{ post.author.profile.avatar.url }}" alt="">
@@ -633,6 +754,10 @@
                         <div class="card-author-avatar-placeholder">{{ post.author.profile.display_name|first|upper }}</div>
                     {% endif %}
                     <span class="card-author-name">{{ post.author.profile.display_name }}</span>
+                    <div class="card-comment-count">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                        {{ post.comments.count }}
+                    </div>
                 </div>
             </article>
             {% endfor %}
@@ -679,6 +804,25 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Location</label>
+                        <div class="location-group">
+                            <div class="location-header">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>Check-in</span>
+                                <button type="button" class="gps-btn" id="gps-btn" onclick="getGPSLocation()">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                                    <span id="gps-btn-text">Use GPS</span>
+                                </button>
+                            </div>
+                            <input type="text" class="location-input" id="location-name" name="location_name" placeholder="Type a place name (e.g. Café Amazon, Siam Square)…">
+                            <input type="hidden" id="post-latitude" name="latitude">
+                            <input type="hidden" id="post-longitude" name="longitude">
+                            <div class="location-coords" id="location-coords">
+                                📍 Coordinates: <span class="coord-value" id="coord-display"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
                         <label for="post-image">Image</label>
                         <input type="file" id="post-image" name="image" accept="image/*">
                     </div>
@@ -720,6 +864,68 @@
         document.querySelectorAll('.toast').forEach(t => {
             setTimeout(() => t.remove(), 4000);
         });
+
+        // ---------- GPS LOCATION ----------
+        function getGPSLocation() {
+            const btn = document.getElementById('gps-btn');
+            const btnText = document.getElementById('gps-btn-text');
+            const latInput = document.getElementById('post-latitude');
+            const lngInput = document.getElementById('post-longitude');
+            const coordsDiv = document.getElementById('location-coords');
+            const coordDisplay = document.getElementById('coord-display');
+            const nameInput = document.getElementById('location-name');
+
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser.');
+                return;
+            }
+
+            btn.classList.add('loading');
+            btnText.textContent = 'Getting location…';
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    latInput.value = lat;
+                    lngInput.value = lng;
+
+                    coordDisplay.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    coordsDiv.classList.add('visible');
+
+                    btn.classList.remove('loading');
+                    btn.classList.add('active');
+                    btnText.textContent = 'Located ✓';
+
+                    // Auto-fill location name if empty using reverse geocoding
+                    if (!nameInput.value.trim()) {
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+                            headers: { 'Accept-Language': 'en' }
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.display_name) {
+                                // Use a shorter version of the name
+                                const parts = data.display_name.split(',');
+                                nameInput.value = parts.slice(0, 3).join(',').trim();
+                            }
+                        })
+                        .catch(() => {});
+                    }
+                },
+                (error) => {
+                    btn.classList.remove('loading');
+                    btnText.textContent = 'Use GPS';
+                    let msg = 'Unable to get your location.';
+                    if (error.code === 1) msg = 'Location permission denied. Please allow access.';
+                    else if (error.code === 2) msg = 'Location unavailable.';
+                    else if (error.code === 3) msg = 'Location request timed out.';
+                    alert(msg);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
+        }
     </script>
 </body>
 </html>

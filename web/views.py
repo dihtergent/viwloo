@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.decorators.http import require_POST
-from .models import UserProfile, Post
+from .models import UserProfile, Post, Comment
 
+from django.db import models
 import cloudinary.uploader
 
 
@@ -86,18 +87,29 @@ def page_view(request):
 
 @login_required(login_url='/')
 def create_post(request):
-    """Handle post creation via AJAX or normal form submit."""
+    """Handle post creation with optional GPS location."""
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
         body = request.POST.get('body', '').strip()
         category = request.POST.get('category', 'recommended')
         image_file = request.FILES.get('image')
+        location_name = request.POST.get('location_name', '').strip()
+        lat = request.POST.get('latitude', '').strip()
+        lng = request.POST.get('longitude', '').strip()
 
         if not title:
             messages.error(request, 'Title is required.')
             return redirect('page')
 
         post = Post(author=request.user, title=title, body=body, category=category)
+        post.location_name = location_name
+
+        if lat and lng:
+            try:
+                post.latitude = float(lat)
+                post.longitude = float(lng)
+            except (ValueError, TypeError):
+                pass
 
         if image_file:
             upload_result = cloudinary.uploader.upload(image_file)
@@ -108,6 +120,51 @@ def create_post(request):
         return redirect('page')
 
     return redirect('page')
+
+
+# ---------- Post Detail ----------
+
+@login_required(login_url='/')
+def post_detail(request, pk):
+    """Single post view with comments."""
+    post = get_object_or_404(
+        Post.objects.select_related('author', 'author__profile'),
+        pk=pk
+    )
+    # Increment view count
+    Post.objects.filter(pk=pk).update(views_count=models.F('views_count') + 1)
+
+    comments = post.comments.select_related('author', 'author__profile')
+
+    profile, _ = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'display_name': request.user.username}
+    )
+
+    context = {
+        'post': post,
+        'comments': comments,
+        'profile': profile,
+    }
+    return render(request, 'post_detail.html', context)
+
+
+# ---------- Add Comment ----------
+
+@login_required(login_url='/')
+@require_POST
+def add_comment(request, pk):
+    """Add a comment to a post."""
+    post = get_object_or_404(Post, pk=pk)
+    text = request.POST.get('text', '').strip()
+
+    if text:
+        Comment.objects.create(post=post, author=request.user, text=text)
+        messages.success(request, 'Comment added!')
+    else:
+        messages.error(request, 'Comment cannot be empty.')
+
+    return redirect('post_detail', pk=pk)
 
 
 # ---------- Account Settings ----------

@@ -42,6 +42,9 @@ class Post(models.Model):
     image = CloudinaryField('image', blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='recommended')
     views_count = models.PositiveIntegerField(default=0)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    location_name = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -49,3 +52,27 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def has_location(self):
+        return self.latitude is not None and self.longitude is not None
+
+    @property
+    def google_maps_url(self):
+        if self.has_location:
+            return f'https://www.google.com/maps?q={self.latitude},{self.longitude}'
+        return ''
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comments')
+    text = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.author.username} on {self.post.title}'
+
