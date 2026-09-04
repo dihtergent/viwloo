@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block title %}สร้างโพสต์ใหม่ - Viwloo{% endblock %}
+
+{% block extra_head %}
+<style>
+    .create-page {
+        max-width: 720px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+        width: 100%;
+    }
+
+    .create-card {
+        background: var(--bg-card);
+        border: 1px solid var(--bg-card-border);
+        border-radius: 24px;
+        padding: 2.5rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(99, 102, 241, 0.08);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .create-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--bg-card-border);
+    }
+
+    .create-header-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a5b4fc;
+    }
+
+    .create-header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .create-header-sub {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #cbd5e1;
+    }
+
+    .form-input, .form-textarea {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--text-main);
+        padding: 0.85rem 1.15rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-input:focus, .form-textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+        background: rgba(15, 23, 42, 0.9);
+    }
+
+    /* Dropzone Styling */
+    .dropzone {
+        border: 2px dashed rgba(99, 102, 241, 0.4);
+        border-radius: 16px;
+        background: rgba(15, 23, 42, 0.4);
+        padding: 2.5rem 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.08);
+    }
+
+    .dropzone-icon {
+        width: 54px;
+        height: 54px;
+        margin: 0 auto 1rem;
+        color: #818cf8;
+        background: rgba(99, 102, 241, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dropzone-title {
+        font-weight: 600;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .dropzone-sub {
+        color: var(--text-muted);
+        font-size: 0.825rem;
+    }
+
+    .preview-container {
+        display: none;
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--bg-card-border);
+    }
+
+    .preview-img {
+        width: 100%;
+        max-height: 380px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .btn-remove-preview {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        backdrop-filter: blur(8px);
+        transition: background 0.2s;
+    }
+
+    .btn-remove-preview:hover {
+        background: rgba(239, 68, 68, 0.9);
+    }
+
+    /* Actions */
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--bg-card-border);
+    }
+
+    .btn-cancel {
+        padding: 0.85rem 1.5rem;
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--bg-card-border);
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-main);
+    }
+
+    .btn-publish {
+        padding: 0.85rem 1.85rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: #ffffff;
+        border: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 15px var(--primary-glow);
+        transition: all 0.2s;
+    }
+
+    .btn-publish:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.45);
+    }
+
+    .btn-publish:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-page">
+    <div class="create-card">
+        <div class="create-header">
+            <div class="create-header-icon">
+                <i data-lucide="image-plus" style="width: 24px; height: 24px;"></i>
+            </div>
+            <div>
+                <h1 class="create-header-title">สร้างโพสต์ใหม่</h1>
+                <p class="create-header-sub">อัปโหลดรูปภาพและแชร์เรื่องราวของคุณลงบน Viwloo</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data" id="postForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">รูปภาพ (Image) *</label>
+                
+                <!-- Dropzone Area -->
+                <div class="dropzone" id="dropzone">
+                    <input type="file" name="image" id="imageInput" accept="image/*" style="display: none;" required>
+                    <div class="dropzone-icon">
+                        <i data-lucide="cloud-upload" style="width: 28px; height: 28px;"></i>
+                    </div>
+                    <div class="dropzone-title">คลิกเพื่อเลือกรูป หรือลากไฟล์มาวางที่นี่</div>
+                    <div class="dropzone-sub">รองรับไฟล์ JPG, PNG, WEBP, GIF</div>
+                </div>
+
+                <!-- Preview Area -->
+                <div class="preview-container" id="previewContainer">
+                    <img id="previewImage" class="preview-img" alt="ตัวอย่างรูปภาพ">
+                    <button type="button" class="btn-remove-preview" id="removePreviewBtn">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                        <span>เปลี่ยนรูปภาพ</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="title">หัวข้อโพสต์ (Title) *</label>
+                <input 
+                    type="text" 
+                    name="title" 
+                    id="title" 
+                    class="form-input" 
+                    placeholder="เช่น พระอาทิตย์ตกที่เชียงใหม่..." 
+                    maxlength="100" 
+                    value="{{ title|default:'' }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="description">คำอธิบาย (Description)</label>
+                <textarea 
+                    name="description" 
+                    id="description" 
+                    class="form-textarea" 
+                    placeholder="บอกเล่าเรื่องราว ความรู้สึก หรือสถานที่ของรูปภาพนี้..."
+                >{{ description|default:'' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'home' %}" class="btn-cancel">ยกเลิก</a>
+                <button type="submit" class="btn-publish" id="submitBtn">
+                    <i data-lucide="send" style="width: 17px; height: 17px;"></i>
+                    <span id="submitBtnText">โพสต์รูปภาพ</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const imageInput = document.getElementById('imageInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImage = document.getElementById('previewImage');
+    const removePreviewBtn = document.getElementById('removePreviewBtn');
+    const postForm = document.getElementById('postForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+
+    dropzone.addEventListener('click', () => imageInput.click());
+
+    // Drag & Drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            imageInput.files = files;
+            showPreview(files[0]);
+        }
+    });
+
+    imageInput.addEventListener('change', () => {
+        if (imageInput.files && imageInput.files[0]) {
+            showPreview(imageInput.files[0]);
+        }
+    });
+
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImage.src = e.target.result;
+            dropzone.style.display = 'none';
+            previewContainer.style.display = 'block';
+            lucide.createIcons();
+        };
+        reader.readAsDataURL(file);
+    }
+
+    removePreviewBtn.addEventListener('click', () => {
+        imageInput.value = '';
+        previewImage.src = '';
+        previewContainer.style.display = 'none';
+        dropzone.style.display = 'block';
+    });
+
+    postForm.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        submitBtnText.textContent = 'กำลังอัปโหลด...';
+    });
+</script>
+{% endblock %}
