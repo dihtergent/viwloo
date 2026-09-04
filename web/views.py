@@ -1,120 +1,166 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .models import images
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from .models import UserProfile, Post
 
-def home(request):
-    img_list = images.objects.all().order_by('-created_at', '-id')
-    return render(request, 'index.html', {'images': img_list})
+import cloudinary.uploader
 
-@login_required(login_url='login')
+
+# ---------- Auth ----------
+
+def index(request):
+    """Landing page with login/signup. Redirects to /page/ if already logged in."""
+    if request.user.is_authenticated:
+        return redirect('page')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'login':
+            username = request.POST.get('username', '').strip()
+            password = request.POST.get('password', '')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('page')
+            else:
+                messages.error(request, 'Invalid username or password.')
+
+        elif action == 'signup':
+            username = request.POST.get('username', '').strip()
+            email = request.POST.get('email', '').strip()
+            password = request.POST.get('password', '')
+            password2 = request.POST.get('password2', '')
+
+            if password != password2:
+                messages.error(request, 'Passwords do not match.')
+            elif User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already taken.')
+            elif User.objects.filter(email=email).exists():
+                messages.error(request, 'Email already in use.')
+            else:
+                user = User.objects.create_user(username=username, email=email, password=password)
+                UserProfile.objects.create(user=user, display_name=username)
+                login(request, user)
+                return redirect('page')
+
+    return render(request, 'index.html')
+
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect('index')
+
+
+# ---------- Feed ----------
+
+@login_required(login_url='/')
+def page_view(request):
+    """Main feed — masonry grid of posts with optional tab filtering."""
+    tab = request.GET.get('tab', 'all')
+
+    if tab and tab != 'all':
+        posts = Post.objects.filter(category=tab).select_related('author', 'author__profile')
+    else:
+        posts = Post.objects.all().select_related('author', 'author__profile')
+
+    # Ensure current user has a profile
+    profile, _ = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'display_name': request.user.username}
+    )
+
+    context = {
+        'posts': posts,
+        'profile': profile,
+        'current_tab': tab,
+    }
+    return render(request, 'page.html', context)
+
+
+# ---------- Create Post ----------
+
+@login_required(login_url='/')
 def create_post(request):
+    """Handle post creation via AJAX or normal form submit."""
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
-        description = request.POST.get('description', '').strip()
+        body = request.POST.get('body', '').strip()
+        category = request.POST.get('category', 'recommended')
         image_file = request.FILES.get('image')
 
         if not title:
-            messages.error(request, 'กรุณาระบุหัวข้อโพสต์')
-            return render(request, 'create_post.html', {'title': title, 'description': description})
+            messages.error(request, 'Title is required.')
+            return redirect('page')
 
-        if not image_file:
-            messages.error(request, 'กรุณาเลือกรูปภาพสำหรับโพสต์')
-            return render(request, 'create_post.html', {'title': title, 'description': description})
+        post = Post(author=request.user, title=title, body=body, category=category)
 
-        try:
-            new_post = images.objects.create(
-                user=request.user,
-                title=title,
-                description=description,
-                image=image_file
-            )
-            messages.success(request, 'โพสต์รูปภาพสำเร็จแล้ว!')
-            return redirect('home')
-        except Exception as e:
-            messages.error(request, f'เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ: {str(e)}')
-            return render(request, 'create_post.html', {'title': title, 'description': description})
+        if image_file:
+            upload_result = cloudinary.uploader.upload(image_file)
+            post.image = upload_result.get('public_id')
 
-    return render(request, 'create_post.html')
+        post.save()
+        messages.success(request, 'Post created!')
+        return redirect('page')
 
-@login_required(login_url='login')
-def delete_post(request, pk):
-    post = get_object_or_404(images, pk=pk)
-    if post.user == request.user or request.user.is_superuser:
-        post.delete()
-        messages.success(request, 'ลบโพสต์เรียบร้อยแล้ว')
-    else:
-        messages.error(request, 'คุณไม่มีสิทธิ์ลบโพสต์นี้')
-    return redirect('home')
+    return redirect('page')
 
-def login_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
+
+# ---------- Account Settings ----------
+
+@login_required(login_url='/')
+def account_settings(request):
+    """Edit profile and change password."""
+    profile, _ = UserProfile.objects.get_or_create(
+        user=request.user,
+        defaults={'display_name': request.user.username}
+    )
 
     if request.method == 'POST':
-        identifier = request.POST.get('username', '').strip()
-        password_input = request.POST.get('password', '')
-        remember_me = request.POST.get('remember_me')
+        section = request.POST.get('section', 'profile')
 
-        if not identifier or not password_input:
-            messages.error(request, 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน')
-            return render(request, 'login.html', {'username': identifier})
+        if section == 'profile':
+            display_name = request.POST.get('display_name', '').strip()
+            bio = request.POST.get('bio', '').strip()
+            avatar_file = request.FILES.get('avatar')
 
-        # Allow login with either username or email
-        username = identifier
-        if '@' in identifier:
-            user_obj = User.objects.filter(email__iexact=identifier).first()
-            if user_obj:
-                username = user_obj.username
+            if display_name:
+                profile.display_name = display_name
+            profile.bio = bio
 
-        user = authenticate(request, username=username, password=password_input)
-        if user is not None:
-            login(request, user)
+            if avatar_file:
+                upload_result = cloudinary.uploader.upload(avatar_file)
+                profile.avatar = upload_result.get('public_id')
 
-            # Handle Remember Me
-            if remember_me:
-                request.session.set_expiry(1209600)  # 2 weeks
+            profile.save()
+            messages.success(request, 'Profile updated!')
+
+        elif section == 'password':
+            current_password = request.POST.get('current_password', '')
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_password', '')
+
+            if not request.user.check_password(current_password):
+                messages.error(request, 'Current password is incorrect.')
+            elif new_password != confirm_password:
+                messages.error(request, 'New passwords do not match.')
+            elif len(new_password) < 8:
+                messages.error(request, 'Password must be at least 8 characters.')
             else:
-                request.session.set_expiry(0)  # On browser close
+                request.user.set_password(new_password)
+                request.user.save()
+                update_session_auth_hash(request, request.user)
+                messages.success(request, 'Password changed!')
 
-            messages.success(request, f'ยินดีต้อนรับกลับ, {user.username}!')
-            next_url = request.GET.get('next') or request.POST.get('next')
-            if next_url:
-                return redirect(next_url)
-            return redirect('home')
-        else:
-            if User.objects.count() == 0:
-                messages.warning(request, 'ยังไม่มีบัญชีผู้ใช้ในระบบ กรุณาสมัครสมาชิกก่อนเข้าสู่ระบบ')
-            else:
-                messages.error(request, 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
-            return render(request, 'login.html', {'username': identifier})
+        return redirect('account_settings')
 
-    return render(request, 'login.html')
-
-def register_view(request):
-    if request.user.is_authenticated:
-        return redirect('home')
-
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, f'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับ {user.username}')
-            return redirect('home')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, error)
-    else:
-        form = UserCreationForm()
-
-    return render(request, 'register.html', {'form': form})
-
-def logout_view(request):
-    logout(request)
-    messages.info(request, 'ออกจากระบบเรียบร้อยแล้ว')
-    return redirect('login')
+    context = {
+        'profile': profile,
+    }
+    return render(request, 'accout_setting.html', context)

@@ -1,354 +1,320 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Viwloo — Sign in or create an account to start sharing">
+    <title>Viwloo — Welcome</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-{% block title %}หน้าแรก - Viwloo{% endblock %}
+        :root {
+            --bg:            #07070a;
+            --surface:       #111116;
+            --surface-2:     #1a1a22;
+            --border:        rgba(255,255,255,0.06);
+            --text:          #f0f0f5;
+            --text-sec:      #9b9bb0;
+            --text-muted:    #5e5e72;
+            --accent:        #7c5cfc;
+            --accent-glow:   rgba(124,92,252,0.3);
+            --accent-hover:  #9478ff;
+            --pink:          #f472b6;
+            --green:         #34d399;
+            --radius:        14px;
+            --transition:    0.3s cubic-bezier(.4,0,.2,1);
+        }
 
-{% block extra_head %}
-<style>
-    .hero-section {
-        max-width: 1000px;
-        margin: 3.5rem auto 2rem;
-        padding: 0 1.5rem;
-        text-align: center;
-    }
+        html, body { height: 100%; }
 
-    .hero-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 1rem;
-        background: rgba(99, 102, 241, 0.12);
-        border: 1px solid rgba(99, 102, 241, 0.3);
-        border-radius: 9999px;
-        color: #a5b4fc;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-    .hero-title {
-        font-size: 2.75rem;
-        font-weight: 800;
-        line-height: 1.2;
-        letter-spacing: -1px;
-        margin-bottom: 1rem;
-    }
+        /* Animated gradient bg */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .bg-glow::before, .bg-glow::after {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.25;
+            animation: drift 12s ease-in-out infinite alternate;
+        }
+        .bg-glow::before {
+            background: var(--accent);
+            top: -20%; left: -10%;
+        }
+        .bg-glow::after {
+            background: var(--pink);
+            bottom: -20%; right: -10%;
+            animation-delay: -6s;
+        }
+        @keyframes drift {
+            from { transform: translate(0, 0); }
+            to   { transform: translate(60px, 40px); }
+        }
 
-    .gradient-text {
-        background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+        /* Container */
+        .auth-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            padding: 20px;
+        }
 
-    .hero-desc {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        max-width: 580px;
-        margin: 0 auto 2rem;
-        line-height: 1.6;
-    }
+        .auth-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px 36px;
+            box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+        }
 
-    .hero-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        align-items: center;
-    }
+        /* Brand */
+        .brand {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .brand-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            margin-bottom: 16px;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .brand-logo svg { width: 28px; height: 28px; }
+        .brand h1 {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .brand p {
+            font-size: 14px;
+            color: var(--text-sec);
+            margin-top: 6px;
+        }
 
-    .btn-main {
-        text-decoration: none;
-        padding: 0.8rem 1.6rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+        /* Tabs */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 28px;
+            border-radius: 12px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            padding: 4px;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 9px;
+            transition: var(--transition);
+        }
+        .auth-tab:hover { color: var(--text-sec); }
+        .auth-tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
 
-    .btn-primary-gradient {
-        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-        color: #fff;
-        box-shadow: 0 4px 18px var(--primary-glow);
-    }
+        /* Forms */
+        .auth-form { display: none; }
+        .auth-form.active { display: block; animation: fadeUp 0.35s ease; }
 
-    .btn-primary-gradient:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.45);
-    }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-    .btn-secondary-outline {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text-main);
-        border: 1px solid var(--bg-card-border);
-    }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .form-group input::placeholder { color: var(--text-muted); }
 
-    .btn-secondary-outline:hover {
-        background: rgba(255, 255, 255, 0.1);
-    }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: #fff;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 4px;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active { transform: translateY(0); }
 
-    /* Gallery Feed */
-    .gallery-container {
-        max-width: 1200px;
-        margin: 2.5rem auto 5rem;
-        padding: 0 1.5rem;
-        width: 100%;
-    }
+        /* Messages */
+        .msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            animation: fadeUp 0.3s ease;
+        }
+        .msg.error   { background: rgba(255,77,106,0.12); color: #ff6b8a; border: 1px solid rgba(255,77,106,0.2); }
+        .msg.success { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
 
-    .feed-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--bg-card-border);
-    }
+        /* Footer */
+        .auth-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
 
-    .feed-title {
-        font-size: 1.35rem;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.75rem;
-    }
-
-    .post-card {
-        background: var(--bg-card);
-        border: 1px solid var(--bg-card-border);
-        border-radius: 20px;
-        overflow: hidden;
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .post-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-        border-color: rgba(99, 102, 241, 0.3);
-    }
-
-    .post-image-wrapper {
-        position: relative;
-        width: 100%;
-        height: 250px;
-        background: #0f172a;
-        overflow: hidden;
-    }
-
-    .post-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-
-    .post-card:hover .post-image {
-        transform: scale(1.03);
-    }
-
-    .post-body {
-        padding: 1.25rem 1.35rem;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .post-meta {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        font-size: 0.825rem;
-        color: var(--text-muted);
-    }
-
-    .post-author {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-weight: 600;
-        color: #cbd5e1;
-    }
-
-    .post-author-avatar {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--primary), var(--accent));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.7rem;
-        color: #fff;
-        font-weight: 700;
-    }
-
-    .post-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        margin-bottom: 0.4rem;
-        color: var(--text-main);
-        line-height: 1.35;
-    }
-
-    .post-desc {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        line-height: 1.5;
-        margin-bottom: 1rem;
-        flex: 1;
-    }
-
-    .post-footer {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-top: 0.85rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .btn-delete {
-        background: none;
-        border: none;
-        color: #ef4444;
-        cursor: pointer;
-        padding: 0.35rem 0.6rem;
-        border-radius: 8px;
-        font-size: 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-        transition: background 0.15s;
-    }
-
-    .btn-delete:hover {
-        background: rgba(239, 68, 68, 0.15);
-    }
-
-    .empty-feed {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 5rem 1.5rem;
-        background: var(--bg-card);
-        border: 1px dashed var(--bg-card-border);
-        border-radius: 20px;
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="hero-section">
-    <div class="hero-badge">
-        <i data-lucide="sparkles" style="width: 15px; height: 15px;"></i>
-        <span>Viwloo Media Platform</span>
-    </div>
-    <h1 class="hero-title">
-        แชร์ภาพถ่ายและเรื่องราว <br>
-        <span class="gradient-text">ในสไตล์ที่คุณต้องการ</span>
-    </h1>
-    <p class="hero-desc">
-        พื้นที่จัดเก็บและแบ่งปันรูปภาพคุณภาพสูง พร้อมการเชื่อมต่อ Cloudinary
-    </p>
-
-    <div class="hero-actions">
-        {% if user.is_authenticated %}
-            <a href="{% url 'create_post' %}" class="btn-main btn-primary-gradient">
-                <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
-                สร้างโพสต์ใหม่
-            </a>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn-main btn-primary-gradient">
-                <i data-lucide="log-in" style="width: 18px; height: 18px;"></i>
-                เข้าสู่ระบบเพื่อโพสต์
-            </a>
-            <a href="{% url 'register' %}" class="btn-main btn-secondary-outline">
-                <i data-lucide="user-plus" style="width: 18px; height: 18px;"></i>
-                สมัครสมาชิก
-            </a>
-        {% endif %}
-    </div>
-</div>
-
-<div class="gallery-container">
-    <div class="feed-header">
-        <h2 class="feed-title">
-            <i data-lucide="layout-grid" style="width: 20px; height: 20px; color: #818cf8;"></i>
-            ฟีดรูปภาพล่าสุด
-        </h2>
-        {% if user.is_authenticated %}
-            <a href="{% url 'create_post' %}" class="btn-secondary-outline btn-main" style="padding: 0.45rem 0.9rem; font-size: 0.85rem;">
-                <i data-lucide="plus" style="width: 15px; height: 15px;"></i>
-                เพิ่มรูปใหม่
-            </a>
-        {% endif %}
-    </div>
-
-    <div class="gallery-grid">
-        {% for img in images %}
-        <div class="post-card">
-            <div class="post-image-wrapper">
-                {% if img.image %}
-                    <img src="{{ img.image.url }}" alt="{{ img.title }}" class="post-image" loading="lazy">
-                {% endif %}
-            </div>
-            <div class="post-body">
-                <div class="post-meta">
-                    <div class="post-author">
-                        <div class="post-author-avatar">
-                            {{ img.user.username|default:"V"|make_list|first|upper }}
-                        </div>
-                        <span>{{ img.user.username|default:"Viwloo User" }}</span>
-                    </div>
-                    {% if img.created_at %}
-                        <span>{{ img.created_at|date:"d M Y" }}</span>
-                    {% endif %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 </div>
-
-                <h3 class="post-title">{{ img.title }}</h3>
-                {% if img.description %}
-                    <p class="post-desc">{{ img.description }}</p>
-                {% endif %}
-
-                {% if user.is_authenticated and user == img.user or user.is_superuser %}
-                <div class="post-footer">
-                    <div></div>
-                    <form method="POST" action="{% url 'delete_post' img.id %}" onsubmit="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบโพสต์นี้?');">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-delete">
-                            <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                            <span>ลบ</span>
-                        </button>
-                    </form>
-                </div>
-                {% endif %}
+                <h1>Viwloo</h1>
+                <p>Discover &amp; share amazing content</p>
             </div>
-        </div>
-        {% empty %}
-        <div class="empty-feed">
-            <i data-lucide="image" style="width: 54px; height: 54px; margin-bottom: 1rem; color: var(--text-muted); opacity: 0.5;"></i>
-            <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">ยังไม่มีรูปภาพในระบบ</h3>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">ร่วมเป็นคนแรกที่แชร์ภาพสวยๆ ลงบน Viwloo</p>
-            {% if user.is_authenticated %}
-                <a href="{% url 'create_post' %}" class="btn-main btn-primary-gradient">
-                    <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i>
-                    สร้างโพสต์แรกของคุณ
-                </a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-main btn-primary-gradient">
-                    เข้าสู่ระบบเพื่อเริ่มโพสต์
-                </a>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="msg {{ msg.tags }}">{{ msg.message }}</div>
+                {% endfor %}
             {% endif %}
+
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-target="login-form" id="tab-login">Sign In</div>
+                <div class="auth-tab" data-target="signup-form" id="tab-signup">Sign Up</div>
+            </div>
+
+            <!-- Login Form -->
+            <form class="auth-form active" id="login-form" method="POST" action="{% url 'index' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="login">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" name="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary">Sign In</button>
+            </form>
+
+            <!-- Signup Form -->
+            <form class="auth-form" id="signup-form" method="POST" action="{% url 'index' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="signup">
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" id="signup-username" name="username" placeholder="Choose a username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" id="signup-email" name="email" placeholder="your@email.com" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" id="signup-password" name="password" placeholder="At least 8 characters" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label for="signup-password2">Confirm Password</label>
+                    <input type="password" id="signup-password2" name="password2" placeholder="Repeat password" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+
+            <div class="auth-footer">
+                &copy; 2026 Viwloo. All rights reserved.
+            </div>
         </div>
-        {% endfor %}
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        // Tab switching
+        const tabs = document.querySelectorAll('.auth-tab');
+        const forms = document.querySelectorAll('.auth-form');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                forms.forEach(f => f.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.target).classList.add('active');
+            });
+        });
+
+        // If there's an error and action was signup, auto-switch to signup tab
+        {% if messages %}
+            const formAction = '{{ request.POST.action|default:"login" }}';
+            if (formAction === 'signup') {
+                document.getElementById('tab-signup').click();
+            }
+        {% endif %}
+    </script>
+</body>
+</html>

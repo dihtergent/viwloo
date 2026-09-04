@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Viwloo — Discover and share amazing content with your community">
+    <title>Viwloo — Feed</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================================
+           RESET & GLOBAL TOKENS
+           ============================================================ */
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --bg-primary:    #0a0a0c;
+            --bg-card:       #141418;
+            --bg-card-hover: #1c1c22;
+            --bg-glass:      rgba(20, 20, 24, 0.75);
+            --surface:       #1e1e24;
+            --border:        rgba(255,255,255,0.06);
+            --text-primary:  #f0f0f5;
+            --text-secondary:#9b9bb0;
+            --text-muted:    #5e5e72;
+            --accent:        #7c5cfc;
+            --accent-glow:   rgba(124,92,252,0.35);
+            --accent-hover:  #9478ff;
+            --green:         #34d399;
+            --pink:          #f472b6;
+            --amber:         #fbbf24;
+            --radius:        12px;
+            --radius-lg:     18px;
+            --shadow:        0 8px 32px rgba(0,0,0,0.45);
+            --transition:    0.25s cubic-bezier(.4,0,.2,1);
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           HEADER BAR
+           ============================================================ */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 28px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 200px;
+        }
+
+        .back-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            font-size: 18px;
+        }
+        .back-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+        .avatar-wrap {
+            position: relative;
+            width: 42px; height: 42px;
+            flex-shrink: 0;
+        }
+        .avatar {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+        }
+        .avatar-placeholder {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 16px;
+            color: #fff;
+            border: 2px solid var(--accent);
+        }
+
+        .user-info { display: flex; flex-direction: column; }
+        .user-info .username {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        .user-info .username:hover { color: var(--accent-hover); }
+        .user-info .handle {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .post-count-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+        .post-count-badge svg { opacity: 0.5; }
+
+        /* ============================================================
+           TABS
+           ============================================================ */
+        .tabs-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+        .tabs {
+            display: flex;
+            gap: 6px;
+            padding: 4px;
+            border-radius: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        .tab {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+        .tab.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 12px var(--accent-glow);
+        }
+
+        /* Header settings icon */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .settings-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        .settings-btn:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+
+        /* ============================================================
+           MASONRY GRID
+           ============================================================ */
+        .feed-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px 20px 100px;
+        }
+
+        .masonry {
+            columns: 4;
+            column-gap: 16px;
+        }
+
+        .card {
+            break-inside: avoid;
+            margin-bottom: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+            border-color: rgba(124,92,252,0.2);
+        }
+
+        .card-image-wrap {
+            position: relative;
+            overflow: hidden;
+        }
+        .card-image-wrap img {
+            width: 100%;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .card:hover .card-image-wrap img {
+            transform: scale(1.04);
+        }
+
+        /* View count badge on image */
+        .views-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(8px);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+        .views-badge svg { width: 14px; height: 14px; }
+
+        /* Category pill on image */
+        .category-pill {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .category-pill.recommended { background: var(--accent); color: #fff; }
+        .category-pill.itinerary { background: var(--green); color: #0a0a0c; }
+        .category-pill.route { background: var(--pink); color: #fff; }
+        .category-pill.proxy { background: var(--amber); color: #0a0a0c; }
+
+        .card-body {
+            padding: 14px 16px 16px;
+        }
+
+        .card-body .card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-body .card-excerpt {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 16px 14px;
+        }
+        .card-author-avatar {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid var(--border);
+        }
+        .card-author-avatar-placeholder {
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 700; color: #fff;
+        }
+        .card-author-name {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Card without image */
+        .card.text-only .card-body {
+            padding: 20px 16px;
+        }
+
+        /* ============================================================
+           FLOATING ADD BUTTON
+           ============================================================ */
+        .fab {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: #fff;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 24px var(--accent-glow), 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            z-index: 200;
+        }
+        .fab:hover {
+            transform: scale(1.12) rotate(90deg);
+            box-shadow: 0 8px 36px var(--accent-glow);
+        }
+        .fab:active { transform: scale(0.95); }
+
+        /* ============================================================
+           MODAL
+           ============================================================ */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 520px;
+            padding: 0;
+            box-shadow: var(--shadow);
+            animation: modalIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .modal-close {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: var(--transition);
+        }
+        .modal-close:hover { background: #ff4d6a; color: #fff; border-color: #ff4d6a; }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 14px;
+            transition: var(--transition);
+            outline: none;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+
+        .form-group input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .form-group input[type="file"]::file-selector-button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: var(--transition);
+        }
+        .form-group input[type="file"]::file-selector-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-submit:hover {
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+
+        /* ============================================================
+           EMPTY STATE
+           ============================================================ */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+        .empty-state h3 {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* ============================================================
+           MESSAGES / TOAST
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            animation: toastIn 0.35s ease, toastOut 0.35s ease 3.5s forwards;
+            box-shadow: var(--shadow);
+        }
+        .toast.success { background: var(--green); color: #0a0a0c; }
+        .toast.error   { background: #ff4d6a; }
+
+        @keyframes toastIn  { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
+        @keyframes toastOut { from { opacity:1; } to { opacity:0; transform: translateX(40px); } }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1100px) {
+            .masonry { columns: 3; }
+        }
+        @media (max-width: 800px) {
+            .masonry { columns: 2; }
+            .header { padding: 12px 16px; gap: 10px; }
+            .tabs-wrapper { order: 10; flex-basis: 100%; justify-content: flex-start; overflow-x: auto; }
+            .tabs { gap: 2px; }
+            .tab { padding: 7px 14px; font-size: 12px; }
+            .post-count-badge { font-size: 15px; padding: 4px 10px; }
+            .header { flex-wrap: wrap; }
+        }
+        @media (max-width: 500px) {
+            .masonry { columns: 1; column-gap: 0; }
+            .feed-container { padding: 16px 12px 100px; }
+            .fab { bottom: 20px; right: 20px; width: 52px; height: 52px; font-size: 26px; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST MESSAGES -->
+    {% if messages %}
+    <div class="toast-container">
+        {% for msg in messages %}
+        <div class="toast {{ msg.tags }}">{{ msg.message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- HEADER -->
+    <header class="header" id="header">
+        <div class="header-left">
+            <a href="{% url 'page' %}" class="back-btn" title="Home">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+            </a>
+            <div class="avatar-wrap">
+                {% if profile.avatar %}
+                    <img class="avatar" src="{{ profile.avatar.url }}" alt="{{ profile.display_name }}">
+                {% else %}
+                    <div class="avatar-placeholder">{{ profile.display_name|first|upper }}</div>
+                {% endif %}
+            </div>
+            <div class="user-info">
+                <a href="{% url 'account_settings' %}" class="username">{{ profile.display_name }}</a>
+                <span class="handle">@{{ user.username }}</span>
+            </div>
+            <div class="post-count-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                {{ profile.post_count }}
+            </div>
+        </div>
+
+        <div class="tabs-wrapper">
+            <nav class="tabs" id="tabs">
+                <a href="{% url 'page' %}" class="tab {% if current_tab == 'all' %}active{% endif %}">All</a>
+                <a href="{% url 'page' %}?tab=recommended" class="tab {% if current_tab == 'recommended' %}active{% endif %}">Recommended</a>
+                <a href="{% url 'page' %}?tab=itinerary" class="tab {% if current_tab == 'itinerary' %}active{% endif %}">Itinerary</a>
+                <a href="{% url 'page' %}?tab=route" class="tab {% if current_tab == 'route' %}active{% endif %}">Route</a>
+                <a href="{% url 'page' %}?tab=proxy" class="tab {% if current_tab == 'proxy' %}active{% endif %}">Proxy Level</a>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <a href="{% url 'account_settings' %}" class="settings-btn" title="Account Settings" id="settings-link">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <!-- FEED -->
+    <main class="feed-container">
+        {% if posts %}
+        <div class="masonry" id="masonry-grid">
+            {% for post in posts %}
+            <article class="card {% if not post.image %}text-only{% endif %}" id="post-{{ post.id }}">
+                {% if post.image %}
+                <div class="card-image-wrap">
+                    <img src="{{ post.image.url }}" alt="{{ post.title }}" loading="lazy">
+                    <div class="views-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        {{ post.views_count }}
+                    </div>
+                    <span class="category-pill {{ post.category }}">{{ post.get_category_display }}</span>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    {% if not post.image %}
+                    <span class="category-pill {{ post.category }}" style="position:static;display:inline-block;margin-bottom:10px;">{{ post.get_category_display }}</span>
+                    {% endif %}
+                    <h3 class="card-title">{{ post.title }}</h3>
+                    {% if post.body %}
+                    <p class="card-excerpt">{{ post.body }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if post.author.profile.avatar %}
+                        <img class="card-author-avatar" src="{{ post.author.profile.avatar.url }}" alt="">
+                    {% else %}
+                        <div class="card-author-avatar-placeholder">{{ post.author.profile.display_name|first|upper }}</div>
+                    {% endif %}
+                    <span class="card-author-name">{{ post.author.profile.display_name }}</span>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <h3>No posts yet</h3>
+            <p>Be the first to share something amazing — tap the + button!</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- FLOATING ADD BUTTON -->
+    <button class="fab" id="fab-add" title="Create new post" aria-label="Create new post">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+
+    <!-- CREATE POST MODAL -->
+    <div class="modal-overlay" id="modal-create">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Create Post</h2>
+                <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data" id="create-post-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="post-title">Title</label>
+                        <input type="text" id="post-title" name="title" placeholder="Give your post a title…" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-body">Description</label>
+                        <textarea id="post-body" name="body" placeholder="Write something…" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-category">Category</label>
+                        <select id="post-category" name="category">
+                            <option value="recommended">Recommended</option>
+                            <option value="itinerary">Itinerary</option>
+                            <option value="route">Route</option>
+                            <option value="proxy">Proxy Level</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-image">Image</label>
+                        <input type="file" id="post-image" name="image" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn-submit">Publish Post</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FAB → Modal
+        const fab = document.getElementById('fab-add');
+        const modal = document.getElementById('modal-create');
+        const closeBtn = document.getElementById('modal-close');
+
+        fab.addEventListener('click', () => modal.classList.add('active'));
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+
+        // Keyboard close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') modal.classList.remove('active');
+        });
+
+        // Staggered card entrance animation
+        document.querySelectorAll('.card').forEach((card, i) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `opacity 0.4s ease ${i * 0.05}s, transform 0.4s ease ${i * 0.05}s`;
+            requestAnimationFrame(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Auto-dismiss toasts
+        document.querySelectorAll('.toast').forEach(t => {
+            setTimeout(() => t.remove(), 4000);
+        });
+    </script>
+</body>
+</html>

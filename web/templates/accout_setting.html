@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Viwloo — Manage your account and profile settings">
+    <title>Viwloo — Account Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --bg:            #0a0a0c;
+            --surface:       #111116;
+            --surface-2:     #1a1a22;
+            --border:        rgba(255,255,255,0.06);
+            --text:          #f0f0f5;
+            --text-sec:      #9b9bb0;
+            --text-muted:    #5e5e72;
+            --accent:        #7c5cfc;
+            --accent-glow:   rgba(124,92,252,0.3);
+            --accent-hover:  #9478ff;
+            --pink:          #f472b6;
+            --green:         #34d399;
+            --red:           #ff4d6a;
+            --radius:        14px;
+            --transition:    0.3s cubic-bezier(.4,0,.2,1);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ============ Top bar ============ */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 28px;
+            background: rgba(17,17,22,0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar-back {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .topbar-back:hover { background: var(--accent); border-color: var(--accent); }
+        .topbar h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        /* ============ Layout ============ */
+        .settings-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 20px 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .section-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-header svg { color: var(--accent); flex-shrink: 0; }
+        .section-body {
+            padding: 24px;
+        }
+
+        /* ============ Avatar edit ============ */
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        .avatar-preview {
+            position: relative;
+            width: 80px; height: 80px;
+            flex-shrink: 0;
+        }
+        .avatar-preview img {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+        }
+        .avatar-preview .avatar-placeholder {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--pink));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; font-weight: 800; color: #fff;
+            border: 3px solid var(--accent);
+        }
+        .avatar-preview .avatar-badge {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .avatar-info h3 { font-size: 16px; margin-bottom: 4px; }
+        .avatar-info p { font-size: 13px; color: var(--text-muted); }
+
+        /* ============ Form ============ */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder { color: var(--text-muted); }
+
+        .form-group input[type="file"] {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .form-group input[type="file"]::file-selector-button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: var(--transition);
+        }
+        .form-group input[type="file"]::file-selector-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .form-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            color: #fff;
+        }
+        .btn-accent:hover {
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: rgba(255,77,106,0.12);
+            color: var(--red);
+            border: 1px solid rgba(255,77,106,0.15);
+        }
+        .btn-danger:hover {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Messages */
+        .msg {
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            animation: fadeUp 0.3s ease;
+        }
+        .msg.error   { background: rgba(255,77,106,0.1); color: #ff6b8a; border: 1px solid rgba(255,77,106,0.15); }
+        .msg.success { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.15); }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============ Danger zone ============ */
+        .danger-zone {
+            border-color: rgba(255,77,106,0.15);
+        }
+        .danger-zone .section-header {
+            border-bottom-color: rgba(255,77,106,0.1);
+        }
+        .danger-zone .section-header svg { color: var(--red); }
+
+        /* ============ Responsive ============ */
+        @media (max-width: 500px) {
+            .avatar-section { flex-direction: column; text-align: center; }
+            .topbar { padding: 14px 16px; }
+            .section-body { padding: 20px 16px; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <a href="{% url 'page' %}" class="topbar-back" title="Back to Feed">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1>Account Settings</h1>
+    </div>
+
+    <div class="settings-container">
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="msg {{ msg.tags }}">{{ msg.message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- ====== PROFILE SECTION ====== -->
+        <div class="section">
+            <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+            </div>
+            <div class="section-body">
+                <form method="POST" enctype="multipart/form-data" id="profile-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="profile">
+
+                    <div class="avatar-section">
+                        <div class="avatar-preview">
+                            {% if profile.avatar %}
+                                <img src="{{ profile.avatar.url }}" alt="{{ profile.display_name }}" id="avatar-img">
+                            {% else %}
+                                <div class="avatar-placeholder" id="avatar-img">{{ profile.display_name|first|upper }}</div>
+                            {% endif %}
+                            <label for="avatar-file" class="avatar-badge" title="Change avatar">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            </label>
+                        </div>
+                        <div class="avatar-info">
+                            <h3>{{ profile.display_name }}</h3>
+                            <p>@{{ user.username }} · {{ profile.post_count }} posts</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar-file">Avatar</label>
+                        <input type="file" id="avatar-file" name="avatar" accept="image/*">
+                        <div class="form-hint">Recommended: square image, at least 200×200px</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="display-name">Display Name</label>
+                        <input type="text" id="display-name" name="display_name" value="{{ profile.display_name }}" placeholder="Your display name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
+                        <textarea id="bio" name="bio" placeholder="Tell us about yourself…" rows="3">{{ profile.bio }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Save Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====== PASSWORD SECTION ====== -->
+        <div class="section">
+            <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                Change Password
+            </div>
+            <div class="section-body">
+                <form method="POST" id="password-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="section" value="password">
+
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" name="current_password" placeholder="Enter current password" required autocomplete="current-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" name="new_password" placeholder="At least 8 characters" required autocomplete="new-password">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm_password" placeholder="Repeat new password" required autocomplete="new-password">
+                    </div>
+
+                    <button type="submit" class="btn btn-accent">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                        Update Password
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====== DANGER ZONE ====== -->
+        <div class="section danger-zone">
+            <div class="section-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Session
+            </div>
+            <div class="section-body">
+                <p style="font-size:13px; color:var(--text-sec); margin-bottom:16px;">
+                    Sign out of your current session on this device.
+                </p>
+                <form method="POST" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Live avatar preview
+        const avatarInput = document.getElementById('avatar-file');
+        const avatarImg = document.getElementById('avatar-img');
+
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarImg.tagName === 'IMG') {
+                        avatarImg.src = e.target.result;
+                    } else {
+                        // Replace placeholder div with img
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.id = 'avatar-img';
+                        img.alt = 'Avatar preview';
+                        img.style.cssText = 'width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--accent);';
+                        avatarImg.replaceWith(img);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>
