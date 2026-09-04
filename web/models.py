@@ -40,6 +40,7 @@ class Post(models.Model):
     image = CloudinaryField('image', blank=True, null=True)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='interknot')
     views_count = models.PositiveIntegerField(default=0)
+    likes = models.ManyToManyField(User, related_name='liked_posts', blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     location_name = models.CharField(max_length=255, blank=True)
@@ -50,6 +51,15 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def likes_count(self):
+        return self.likes.count()
+
+    def is_liked_by(self, user):
+        if not user or not user.is_authenticated:
+            return False
+        return self.likes.filter(id=user.id).exists()
 
     @property
     def has_location(self):

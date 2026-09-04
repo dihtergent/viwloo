@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -75,16 +76,24 @@ def page_view(request):
     """Main feed — masonry grid of posts with Interknot & Proxy tabs."""
     purge_expired_posts()
     tab = request.GET.get('tab', 'interknot')
+    proxy_filter = request.GET.get('filter', 'my_posts')
+
+    my_posts_count = Post.objects.filter(author=request.user).count()
+    liked_posts_count = request.user.liked_posts.count()
 
     if tab == 'proxy':
-        posts = Post.objects.filter(category='proxy').select_related('author', 'author__profile')
+        if proxy_filter == 'liked':
+            posts = request.user.liked_posts.all().select_related('author', 'author__profile')
+        else:
+            posts = Post.objects.filter(author=request.user).select_related('author', 'author__profile')
     else:
         # Default 'interknot' tab includes interknot & legacy categories
         posts = Post.objects.filter(
-            models.Q(category='interknot') | models.Q(category__in=['recommended', 'itinerary', 'route'])
+            models.Q(category='interknot') | models.Q(category__in=['recommended', 'itinerary', 'route', 'proxy'])
         ).select_related('author', 'author__profile')
 
-    # Ensure current user has a profile
+    user_liked_post_ids = set(request.user.liked_posts.values_list('id', flat=True))
+
     profile, _ = UserProfile.objects.get_or_create(
         user=request.user,
         defaults={'display_name': request.user.username}
@@ -94,8 +103,35 @@ def page_view(request):
         'posts': posts,
         'profile': profile,
         'current_tab': tab,
+        'proxy_filter': proxy_filter,
+        'my_posts_count': my_posts_count,
+        'liked_posts_count': liked_posts_count,
+        'user_liked_post_ids': user_liked_post_ids,
     }
     return render(request, 'page.html', context)
+
+
+# ---------- Like / Unlike ----------
+
+@login_required(login_url='/')
+@require_POST
+def toggle_like(request, pk):
+    """Toggle like state on a post."""
+    post = get_object_or_404(Post, pk=pk)
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+        liked = False
+    else:
+        post.likes.add(request.user)
+        liked = True
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'json' in request.headers.get('Accept', ''):
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': post.likes_count,
+        })
+
+    return redirect(request.META.get('HTTP_REFERER', 'page'))
 
 
 # ---------- Create Post ----------
@@ -159,6 +195,7 @@ def post_detail(request, pk):
     Post.objects.filter(pk=pk).update(views_count=models.F('views_count') + 1)
 
     comments = post.comments.select_related('author', 'author__profile')
+    is_liked = post.is_liked_by(request.user)
 
     profile, _ = UserProfile.objects.get_or_create(
         user=request.user,
@@ -169,6 +206,7 @@ def post_detail(request, pk):
         'post': post,
         'comments': comments,
         'profile': profile,
+        'is_liked': is_liked,
     }
     return render(request, 'post_detail.html', context)
 
