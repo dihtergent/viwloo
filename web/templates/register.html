@@ -1,185 +1,31 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}สมัครสมาชิก - Viwloo{% endblock %}
 
-{% block extra_head %}
-<style>
-    .auth-page {
-        min-height: calc(100vh - 80px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem 1.5rem;
-    }
-
-    .auth-card {
-        width: 100%;
-        max-width: 460px;
-        background: var(--bg-card);
-        border: 1px solid var(--bg-card-border);
-        border-radius: 24px;
-        padding: 2.75rem 2.25rem;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(236, 72, 153, 0.1);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        animation: fadeIn 0.4s ease-out;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(16px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .auth-icon {
-        width: 56px;
-        height: 56px;
-        margin: 0 auto 1.25rem;
-        background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(99, 102, 241, 0.2));
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #f472b6;
-    }
-
-    .auth-title {
-        font-size: 1.75rem;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-        margin-bottom: 0.5rem;
-    }
-
-    .auth-subtitle {
-        color: var(--text-muted);
-        font-size: 0.95rem;
-    }
-
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #cbd5e1;
-    }
-
-    .input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
-
-    .input-icon {
-        position: absolute;
-        left: 1rem;
-        color: var(--text-muted);
-        pointer-events: none;
-        width: 18px;
-        height: 18px;
-    }
-
-    .form-input {
-        width: 100%;
-        background: var(--input-bg);
-        border: 1px solid var(--input-border);
-        color: var(--text-main);
-        padding: 0.85rem 1rem 0.85rem 2.75rem;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        outline: none;
-        transition: all 0.2s ease;
-    }
-
-    .form-input:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.35);
-        background: rgba(15, 23, 42, 0.9);
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 0.9rem;
-        margin-top: 0.5rem;
-        border: none;
-        border-radius: 12px;
-        background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-        color: #ffffff;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 15px rgba(236, 72, 153, 0.35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-
-    .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(236, 72, 153, 0.45);
-    }
-
-    .auth-footer {
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        border-top: 1px solid var(--bg-card-border);
-        padding-top: 1.5rem;
-    }
-
-    .auth-footer a {
-        color: #ec4899;
-        text-decoration: none;
-        font-weight: 600;
-        margin-left: 0.25rem;
-    }
-
-    .auth-footer a:hover {
-        color: #f472b6;
-        text-decoration: underline;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="auth-page">
-    <div class="auth-card">
-        <div class="auth-header">
-            <div class="auth-icon">
+    <div class="auth-card" style="max-width:460px;">
+        <div class="auth-header" style="text-align:center;margin-bottom:2rem;">
+            <div class="auth-icon" style="margin:0 auto 1.25rem;background:linear-gradient(135deg, rgba(236,72,153,0.2), rgba(124,92,252,0.2));color:var(--pink);">
                 <i data-lucide="user-plus" style="width: 26px; height: 26px;"></i>
             </div>
-            <h1 class="auth-title">สร้างบัญชีใหม่</h1>
-            <p class="auth-subtitle">เข้าร่วมชุมชน Viwloo ฟรีได้แล้ววันนี้</p>
+            <h1 class="auth-title" style="font-size:1.75rem;font-weight:700;margin-bottom:0.5rem;">สร้างบัญชีใหม่</h1>
+            <p class="auth-subtitle" style="color:var(--text-muted);font-size:0.95rem;">เข้าร่วมชุมชน Viwloo ฟรีได้แล้ววันนี้</p>
         </div>
 
         <form method="POST" action="{% url 'register' %}">
             {% csrf_token %}
             <div class="form-group">
                 <label class="form-label" for="id_username">ชื่อผู้ใช้ (Username)</label>
-                <div class="input-wrapper">
-                    <i data-lucide="user" class="input-icon"></i>
+                <div class="input-wrapper" style="position:relative;display:flex;align-items:center;">
+                    <i data-lucide="user" class="input-icon" style="position:absolute;left:1rem;color:var(--text-muted);pointer-events:none;width:18px;height:18px;"></i>
                     <input 
                         type="text" 
                         name="username" 
                         id="id_username" 
                         class="form-input" 
+                        style="padding-left:2.75rem;"
                         placeholder="ตั้งชื่อผู้ใช้ของคุณ"
                         required 
                         autofocus
@@ -189,13 +35,14 @@
 
             <div class="form-group">
                 <label class="form-label" for="id_password1">รหัสผ่าน (Password)</label>
-                <div class="input-wrapper">
-                    <i data-lucide="key-round" class="input-icon"></i>
+                <div class="input-wrapper" style="position:relative;display:flex;align-items:center;">
+                    <i data-lucide="key-round" class="input-icon" style="position:absolute;left:1rem;color:var(--text-muted);pointer-events:none;width:18px;height:18px;"></i>
                     <input 
                         type="password" 
                         name="password1" 
                         id="id_password1" 
                         class="form-input" 
+                        style="padding-left:2.75rem;"
                         placeholder="อย่างน้อย 8 ตัวอักษร" 
                         required
                     >
@@ -204,20 +51,21 @@
 
             <div class="form-group">
                 <label class="form-label" for="id_password2">ยืนยันรหัสผ่าน (Confirm Password)</label>
-                <div class="input-wrapper">
-                    <i data-lucide="shield-check" class="input-icon"></i>
+                <div class="input-wrapper" style="position:relative;display:flex;align-items:center;">
+                    <i data-lucide="shield-check" class="input-icon" style="position:absolute;left:1rem;color:var(--text-muted);pointer-events:none;width:18px;height:18px;"></i>
                     <input 
                         type="password" 
                         name="password2" 
                         id="id_password2" 
                         class="form-input" 
+                        style="padding-left:2.75rem;"
                         placeholder="กรอกรหัสผ่านอีกครั้ง" 
                         required
                     >
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">
+            <button type="submit" class="btn-submit" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;background:linear-gradient(135deg, var(--pink) 0%, var(--accent) 100%);">
                 <span>สมัครสมาชิก</span>
                 <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
             </button>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,224 +8,9 @@
     <title>Viwloo — Welcome</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-        :root {
-            --bg:            #07070a;
-            --surface:       #111116;
-            --surface-2:     #1a1a22;
-            --border:        rgba(255,255,255,0.06);
-            --text:          #f0f0f5;
-            --text-sec:      #9b9bb0;
-            --text-muted:    #5e5e72;
-            --accent:        #7c5cfc;
-            --accent-glow:   rgba(124,92,252,0.3);
-            --accent-hover:  #9478ff;
-            --pink:          #f472b6;
-            --green:         #34d399;
-            --radius:        14px;
-            --transition:    0.3s cubic-bezier(.4,0,.2,1);
-        }
-
-        html, body { height: 100%; }
-
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        /* Animated gradient bg */
-        .bg-glow {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-        .bg-glow::before, .bg-glow::after {
-            content: '';
-            position: absolute;
-            width: 600px; height: 600px;
-            border-radius: 50%;
-            filter: blur(140px);
-            opacity: 0.25;
-            animation: drift 12s ease-in-out infinite alternate;
-        }
-        .bg-glow::before {
-            background: var(--accent);
-            top: -20%; left: -10%;
-        }
-        .bg-glow::after {
-            background: var(--pink);
-            bottom: -20%; right: -10%;
-            animation-delay: -6s;
-        }
-        @keyframes drift {
-            from { transform: translate(0, 0); }
-            to   { transform: translate(60px, 40px); }
-        }
-
-        /* Container */
-        .auth-container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 440px;
-            padding: 20px;
-        }
-
-        .auth-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px 36px;
-            box-shadow: 0 16px 64px rgba(0,0,0,0.5);
-        }
-
-        /* Brand */
-        .brand {
-            text-align: center;
-            margin-bottom: 36px;
-        }
-        .brand-logo {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px; height: 56px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            margin-bottom: 16px;
-            box-shadow: 0 4px 20px var(--accent-glow);
-        }
-        .brand-logo svg { width: 28px; height: 28px; }
-        .brand h1 {
-            font-size: 28px;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, var(--text), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .brand p {
-            font-size: 14px;
-            color: var(--text-sec);
-            margin-top: 6px;
-        }
-
-        /* Tabs */
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 28px;
-            border-radius: 12px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            padding: 4px;
-        }
-        .auth-tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 9px;
-            transition: var(--transition);
-        }
-        .auth-tab:hover { color: var(--text-sec); }
-        .auth-tab.active {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 2px 10px var(--accent-glow);
-        }
-
-        /* Forms */
-        .auth-form { display: none; }
-        .auth-form.active { display: block; animation: fadeUp 0.35s ease; }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-sec);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 13px 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--surface-2);
-            color: var(--text);
-            font-family: inherit;
-            font-size: 14px;
-            transition: var(--transition);
-            outline: none;
-        }
-        .form-group input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-        .form-group input::placeholder { color: var(--text-muted); }
-
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            color: #fff;
-            font-family: inherit;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 4px;
-        }
-        .btn-primary:hover {
-            box-shadow: 0 6px 24px var(--accent-glow);
-            transform: translateY(-2px);
-        }
-        .btn-primary:active { transform: translateY(0); }
-
-        /* Messages */
-        .msg {
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 18px;
-            animation: fadeUp 0.3s ease;
-        }
-        .msg.error   { background: rgba(255,77,106,0.12); color: #ff6b8a; border: 1px solid rgba(255,77,106,0.2); }
-        .msg.success { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.2); }
-
-        /* Footer */
-        .auth-footer {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'cbp.css' %}">
 </head>
-<body>
+<body style="display:flex;align-items:center;justify-content:center;overflow:hidden;">
     <div class="bg-glow"></div>
 
     <div class="auth-container">
@@ -294,27 +80,17 @@
         </div>
     </div>
 
+    <script src="{% static 'logic.js' %}"></script>
+    {% if messages %}
     <script>
-        // Tab switching
-        const tabs = document.querySelectorAll('.auth-tab');
-        const forms = document.querySelectorAll('.auth-form');
-
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(t => t.classList.remove('active'));
-                forms.forEach(f => f.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.target).classList.add('active');
-            });
-        });
-
-        // If there's an error and action was signup, auto-switch to signup tab
-        {% if messages %}
+        document.addEventListener('DOMContentLoaded', () => {
             const formAction = '{{ request.POST.action|default:"login" }}';
             if (formAction === 'signup') {
-                document.getElementById('tab-signup').click();
+                const tabSignup = document.getElementById('tab-signup');
+                if (tabSignup) tabSignup.click();
             }
-        {% endif %}
+        });
     </script>
+    {% endif %}
 </body>
 </html>

@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -8,244 +9,37 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Master CSS -->
+    <link rel="stylesheet" href="{% static 'cbp.css' %}">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --bg-dark: #090d16;
-            --bg-card: rgba(18, 24, 38, 0.75);
-            --bg-card-border: rgba(255, 255, 255, 0.08);
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --primary-glow: rgba(99, 102, 241, 0.35);
-            --accent: #ec4899;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --input-bg: rgba(15, 23, 42, 0.6);
-            --input-border: rgba(255, 255, 255, 0.12);
-            --error-bg: rgba(239, 68, 68, 0.15);
-            --error-border: rgba(239, 68, 68, 0.4);
-            --error-text: #fca5a5;
-            --success-bg: rgba(16, 185, 129, 0.15);
-            --success-border: rgba(16, 185, 129, 0.4);
-            --success-text: #6ee7b7;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Ambient Glow Backgrounds */
-        .ambient-glow-1 {
-            position: fixed;
-            top: -150px;
-            left: -100px;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(40px);
-        }
-
-        .ambient-glow-2 {
-            position: fixed;
-            bottom: -150px;
-            right: -100px;
-            width: 550px;
-            height: 550px;
-            background: radial-gradient(circle, rgba(236, 72, 153, 0.2) 0%, rgba(236, 72, 153, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(50px);
-        }
-
-        /* Header Navigation */
-        header {
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            background: rgba(9, 13, 22, 0.8);
-            border-bottom: 1px solid var(--bg-card-border);
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-            background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .nav-btn {
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 0.55rem 1.2rem;
-            border-radius: 10px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .nav-btn-ghost {
-            color: var(--text-muted);
-        }
-
-        .nav-btn-ghost:hover {
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
-            color: #fff;
-            box-shadow: 0 4px 14px var(--primary-glow);
-        }
-
-        .nav-btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
-        }
-
-        /* Flash Message Toasts */
-        .toast-container {
-            position: fixed;
-            top: 5rem;
-            right: 1.5rem;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-width: 400px;
-            width: calc(100% - 3rem);
-        }
-
-        .toast-msg {
-            padding: 0.9rem 1.2rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            backdrop-filter: blur(12px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .toast-error {
-            background: var(--error-bg);
-            border: 1px solid var(--error-border);
-            color: var(--error-text);
-        }
-
-        .toast-success {
-            background: var(--success-bg);
-            border: 1px solid var(--success-border);
-            color: var(--success-text);
-        }
-
-        .toast-info {
-            background: rgba(59, 130, 246, 0.15);
-            border: 1px solid rgba(59, 130, 246, 0.4);
-            color: #93c5fd;
-        }
-
-        .toast-close {
-            background: none;
-            border: none;
-            color: currentColor;
-            cursor: pointer;
-            margin-left: 0.75rem;
-            opacity: 0.7;
-            transition: opacity 0.15s;
-        }
-
-        .toast-close:hover {
-            opacity: 1;
-        }
-
-        /* Main Content wrapper */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 1;
-        }
-    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <div class="ambient-glow-1"></div>
-    <div class="ambient-glow-2"></div>
+    <div class="bg-glow"></div>
 
     <header>
-        <div class="nav-container">
-            <a href="{% url 'home' %}" class="logo">
+        <div class="nav-container" style="max-width:1200px;margin:0 auto;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+            <a href="{% url 'page' %}" class="logo" style="font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;text-decoration:none;background:linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:flex;align-items:center;gap:0.5rem;">
                 <i data-lucide="layers" style="width: 24px; height: 24px; stroke-width: 2.5;"></i>
                 Viwloo
             </a>
-            <div class="nav-links">
+            <div class="nav-links" style="display:flex;align-items:center;gap:1rem;">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'create_post' %}" class="nav-btn nav-btn-primary">
+                    <a href="{% url 'create_post' %}" class="nav-btn nav-btn-primary" style="text-decoration:none;font-weight:600;font-size:0.9rem;padding:0.55rem 1.2rem;border-radius:10px;display:inline-flex;align-items:center;gap:0.4rem;background:linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);color:#fff;">
                         <i data-lucide="plus-circle" style="width: 17px; height: 17px;"></i>
                         <span>สร้างโพสต์</span>
                     </a>
                     <span style="color: var(--text-muted); font-size: 0.9rem; margin-left: 0.5rem;">
                         <i data-lucide="user" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i>
-                        <strong style="color: var(--text-main);">{{ user.username }}</strong>
+                        <strong style="color: var(--text-main);">{{ user.profile.display_name|default:user.username|truncatechars:13 }}</strong>
                     </span>
-                    <a href="{% url 'logout' %}" class="nav-btn nav-btn-ghost">
+                    <a href="{% url 'logout' %}" class="nav-btn nav-btn-ghost" style="text-decoration:none;font-weight:600;font-size:0.9rem;padding:0.55rem 1.2rem;border-radius:10px;color:var(--text-muted);">
                         <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
                         ออกจากระบบ
                     </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="nav-btn nav-btn-ghost">เข้าสู่ระบบ</a>
-                    <a href="{% url 'register' %}" class="nav-btn nav-btn-primary">สมัครสมาชิก</a>
+                    <a href="{% url 'index' %}" class="nav-btn nav-btn-ghost" style="text-decoration:none;font-weight:600;font-size:0.9rem;padding:0.55rem 1.2rem;border-radius:10px;color:var(--text-muted);">เข้าสู่ระบบ</a>
                 {% endif %}
             </div>
         </div>
@@ -254,7 +48,7 @@
     {% if messages %}
     <div class="toast-container" id="toastContainer">
         {% for message in messages %}
-        <div class="toast-msg toast-{{ message.tags }}">
+        <div class="toast toast-{{ message.tags }}">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
                 {% if message.tags == 'error' %}
                     <i data-lucide="alert-circle" style="width: 18px; height: 18px; flex-shrink: 0;"></i>
@@ -265,7 +59,7 @@
                 {% endif %}
                 <span>{{ message }}</span>
             </div>
-            <button class="toast-close" onclick="this.parentElement.remove()">
+            <button class="toast-close" onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;margin-left:0.75rem;">
                 <i data-lucide="x" style="width: 16px; height: 16px;"></i>
             </button>
         </div>
@@ -277,17 +71,12 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Master JS -->
+    <script src="{% static 'logic.js' %}"></script>
     <script>
-        lucide.createIcons();
-        // Auto-dismiss toasts after 5s
-        setTimeout(() => {
-            const container = document.getElementById('toastContainer');
-            if (container) {
-                container.style.transition = 'opacity 0.5s ease';
-                container.style.opacity = '0';
-                setTimeout(() => container.remove(), 500);
-            }
-        }, 5000);
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     </script>
     {% block extra_js %}{% endblock %}
 </body>

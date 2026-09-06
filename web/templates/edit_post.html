@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,254 +8,7 @@
     <title>Edit Post — Viwloo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
-        :root {
-            --bg-primary:    #0a0a0c;
-            --bg-card:       #141418;
-            --bg-card-hover: #1c1c22;
-            --bg-glass:      rgba(20, 20, 24, 0.75);
-            --surface:       #1e1e24;
-            --border:        rgba(255,255,255,0.06);
-            --text-primary:  #f0f0f5;
-            --text-secondary:#9b9bb0;
-            --text-muted:    #5e5e72;
-            --accent:        #7c5cfc;
-            --accent-glow:   rgba(124,92,252,0.35);
-            --accent-hover:  #9478ff;
-            --green:         #34d399;
-            --pink:          #f472b6;
-            --amber:         #fbbf24;
-            --radius:        12px;
-            --radius-lg:     18px;
-            --shadow:        0 8px 32px rgba(0,0,0,0.45);
-            --transition:    0.25s cubic-bezier(.4,0,.2,1);
-        }
-
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-        }
-
-        /* HEADER */
-        .header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 28px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(20px) saturate(1.6);
-            -webkit-backdrop-filter: blur(20px) saturate(1.6);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .back-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            color: var(--text-primary);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-            text-decoration: none;
-        }
-        .back-btn:hover { background: var(--accent); border-color: var(--accent); }
-
-        .header-title {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        /* FORM CONTAINER */
-        .edit-container {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 30px 20px 100px;
-        }
-
-        .edit-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            box-shadow: var(--shadow);
-            animation: fadeUp 0.4s ease;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(16px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 800;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .card-title svg { color: var(--accent); }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px 14px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 14px;
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        /* Current Image Preview */
-        .image-preview-wrap {
-            position: relative;
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 1px solid var(--border);
-            margin-top: 8px;
-            max-height: 240px;
-        }
-        .image-preview-wrap img {
-            width: 100%;
-            height: 240px;
-            object-fit: cover;
-            display: block;
-        }
-
-        /* GPS LOCATION BOX */
-        .gps-box {
-            background: var(--surface);
-            border: 1px dashed rgba(124, 92, 252, 0.4);
-            border-radius: var(--radius);
-            padding: 16px;
-            margin-top: 6px;
-        }
-        .gps-status {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .gps-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 20px;
-            background: rgba(124, 92, 252, 0.15);
-            color: var(--accent-hover);
-            border: 1px solid rgba(124, 92, 252, 0.3);
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .gps-btn:hover {
-            background: var(--accent);
-            color: #fff;
-        }
-        .gps-clear-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--pink);
-            cursor: pointer;
-        }
-
-        /* BUTTONS */
-        .form-actions {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn-secondary {
-            padding: 10px 22px;
-            border-radius: 24px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .btn-secondary:hover { background: var(--bg-card-hover); }
-
-        .btn-primary {
-            padding: 10px 24px;
-            border-radius: 24px;
-            background: linear-gradient(135deg, var(--accent), #9478ff);
-            border: none;
-            color: #fff;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .btn-primary:hover {
-            box-shadow: 0 4px 16px var(--accent-glow);
-            transform: translateY(-1px);
-        }
-
-        /* TOAST */
-        .toast-container {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 400;
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .toast {
-            padding: 12px 20px;
-            border-radius: var(--radius);
-            font-size: 13px; font-weight: 600; color: #fff;
-            animation: toastIn 0.35s ease;
-            box-shadow: var(--shadow);
-        }
-        .toast.success { background: var(--green); color: #0a0a0c; }
-        .toast.error   { background: #ff4d6a; }
-        @keyframes toastIn { from { opacity:0; transform: translateX(40px); } to { opacity:1; transform: translateX(0); } }
-    </style>
+    <link rel="stylesheet" href="{% static 'cbp.css' %}">
 </head>
 <body>
 
@@ -276,10 +30,10 @@
     </header>
 
     <!-- FORM CONTAINER -->
-    <main class="edit-container">
-        <div class="edit-card">
-            <h2 class="card-title">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    <main class="feed-container" style="max-width:640px;padding:30px 20px 100px;">
+        <div class="modal-card" style="padding:28px;max-width:100%;">
+            <h2 class="card-title" style="font-size:20px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent);"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 Edit Post Details
             </h2>
 
@@ -311,8 +65,8 @@
                 <div class="form-group">
                     <label class="form-label">Post Image</label>
                     {% if post.image %}
-                    <div class="image-preview-wrap">
-                        <img src="{{ post.image.url }}" alt="Current post image" id="current-image-preview">
+                    <div style="border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);margin-top:8px;max-height:240px;">
+                        <img src="{{ post.image.url }}" alt="Current post image" style="width:100%;height:240px;object-fit:cover;display:block;">
                     </div>
                     {% endif %}
                     <label class="form-label" style="margin-top:10px;">Replace Image (Optional)</label>
@@ -322,78 +76,30 @@
                 <!-- GPS Location -->
                 <div class="form-group">
                     <label class="form-label">Check-in Location</label>
-                    <div class="gps-box">
-                        <div class="gps-status">
-                            <button type="button" class="gps-btn" id="edit-gps-btn" onclick="getGPSLocation()">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-                                Update Location via GPS
+                    <div class="location-group">
+                        <div class="location-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--pink);"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span>Location</span>
+                            <button type="button" class="gps-btn" id="gps-btn" onclick="getGPSLocation()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+                                <span id="gps-btn-text">Update GPS</span>
                             </button>
-                            <label class="gps-clear-label">
-                                <input type="checkbox" name="clear_location" value="1" id="clear_location"> Clear location
-                            </label>
                         </div>
-                        <input type="text" class="form-input" id="edit_location_name" name="location_name" value="{{ post.location_name }}" placeholder="Place name (e.g. Siam Paragon, Bangkok)">
-                        <input type="hidden" id="edit_latitude" name="latitude" value="{{ post.latitude|default:'' }}">
-                        <input type="hidden" id="edit_longitude" name="longitude" value="{{ post.longitude|default:'' }}">
+                        <input type="text" class="location-input" id="location-name" name="location_name" value="{{ post.location_name }}" placeholder="Place name (e.g. Siam Paragon, Bangkok)">
+                        <input type="hidden" id="post-latitude" name="latitude" value="{{ post.latitude|default:'' }}">
+                        <input type="hidden" id="post-longitude" name="longitude" value="{{ post.longitude|default:'' }}">
                     </div>
                 </div>
 
                 <!-- Actions -->
-                <div class="form-actions">
-                    <a href="{% url 'post_detail' post.id %}" class="btn-secondary">Cancel</a>
-                    <button type="submit" class="btn-primary" id="save-post-btn">Save Changes</button>
+                <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:28px;padding-top:20px;border-top:1px solid var(--border);">
+                    <a href="{% url 'post_detail' post.id %}" class="modal-close" style="width:auto;height:auto;padding:10px 22px;border-radius:24px;text-decoration:none;font-size:14px;font-weight:700;">Cancel</a>
+                    <button type="submit" class="btn-submit" style="width:auto;padding:10px 24px;border-radius:24px;" id="save-post-btn">Save Changes</button>
                 </div>
             </form>
         </div>
     </main>
 
-    <script>
-        document.querySelectorAll('.toast').forEach(t => setTimeout(() => t.remove(), 4000));
-
-        function getGPSLocation() {
-            const btn = document.getElementById('edit-gps-btn');
-            const locNameInput = document.getElementById('edit_location_name');
-            const latInput = document.getElementById('edit_latitude');
-            const lngInput = document.getElementById('edit_longitude');
-
-            if (!navigator.geolocation) {
-                alert('Geolocation is not supported by your browser.');
-                return;
-            }
-
-            btn.innerHTML = 'Locating…';
-
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    latInput.value = lat;
-                    lngInput.value = lng;
-
-                    btn.innerHTML = '✓ GPS Locked';
-                    btn.style.borderColor = 'var(--green)';
-                    btn.style.color = 'var(--green)';
-
-                    try {
-                        const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-                        const data = await resp.json();
-                        if (data && data.display_name) {
-                            const parts = data.display_name.split(',');
-                            locNameInput.value = parts.slice(0, 3).join(',').trim();
-                        }
-                    } catch (e) {
-                        if (!locNameInput.value) {
-                            locNameInput.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-                        }
-                    }
-                },
-                (err) => {
-                    btn.innerHTML = 'GPS Failed';
-                    alert('Could not get your location. Please check your browser location permissions.');
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
-    </script>
+    <script src="{% static 'logic.js' %}"></script>
 </body>
 </html>
